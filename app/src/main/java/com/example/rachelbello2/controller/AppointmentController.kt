@@ -23,10 +23,15 @@ class AppointmentController(
         appointmentDao.insertAppointment(appointment)
     }
 
-    suspend fun cancelAppointment(appointment: Appointment, availability: Availability) {
-        // Mark availability as available again
-        val updatedAvailability = availability.copy(available = true)
-        availabilityDao.updateAvailability(updatedAvailability)
+    suspend fun cancelAppointment(appointment: Appointment) {
+        // Find the corresponding availability
+        val availability = availabilityDao.getAvailabilityByDateTime(appointment.dateTime)
+        
+        if (availability != null) {
+            // Mark availability as available again
+            val updatedAvailability = availability.copy(available = true)
+            availabilityDao.updateAvailability(updatedAvailability)
+        }
         
         // Remove appointment
         appointmentDao.deleteAppointment(appointment)

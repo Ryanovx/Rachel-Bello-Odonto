@@ -114,9 +114,24 @@ fun DentistScreen(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = "Paciente: ${appointment.patientName}", style = MaterialTheme.typography.bodyLarge)
-                            Text(text = "Data/Hora: ${appointment.dateTime}", style = MaterialTheme.typography.bodyMedium)
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = "Paciente: ${appointment.patientName}", style = MaterialTheme.typography.bodyLarge)
+                                Text(text = "Data/Hora: ${appointment.dateTime}", style = MaterialTheme.typography.bodyMedium)
+                            }
+                            IconButton(onClick = {
+                                scope.launch {
+                                    appointmentController.cancelAppointment(appointment)
+                                    appointments = appointmentController.getAppointments()
+                                    availabilities = dentistController.getAvailabilities()
+                                    snackbarHostState.showSnackbar("Agendamento cancelado!")
+                                }
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Cancelar Agendamento", tint = MaterialTheme.colorScheme.error)
+                            }
                         }
                     }
                 }
