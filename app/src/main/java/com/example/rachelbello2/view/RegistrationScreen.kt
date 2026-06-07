@@ -19,8 +19,7 @@ fun RegistrationScreen(
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var selectedRole by remember { mutableStateOf("Paciente") }
-    val roles = listOf("Paciente", "Dentista")
+    // Role selection removed - Defaults to "Paciente"
     val scope = rememberCoroutineScope()
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -31,7 +30,7 @@ fun RegistrationScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Cadastro", style = MaterialTheme.typography.headlineMedium)
+        Text(text = "Cadastro de Paciente", style = MaterialTheme.typography.headlineMedium)
         
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -61,25 +60,9 @@ fun RegistrationScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "Selecione seu papel:")
-        roles.forEach { role ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                RadioButton(
-                    selected = (role == selectedRole),
-                    onClick = { selectedRole = role }
-                )
-                Text(text = role, modifier = Modifier.padding(start = 8.dp))
-            }
-        }
-
         errorMessage?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error)
             Spacer(modifier = Modifier.height(8.dp))
+            Text(text = it, color = MaterialTheme.colorScheme.error)
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -88,7 +71,8 @@ fun RegistrationScreen(
             onClick = {
                 if (name.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
                     scope.launch {
-                        val success = loginController.register(name, email, password, selectedRole)
+                        // Registering specifically as "Paciente"
+                        val success = loginController.register(name, email, password, "Paciente")
                         if (success) {
                             onRegistrationSuccess()
                         } else {
