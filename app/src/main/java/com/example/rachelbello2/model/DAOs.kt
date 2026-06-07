@@ -25,6 +25,9 @@ interface AvailabilityDao {
     @Query("SELECT * FROM availabilities WHERE available = 1")
     suspend fun getAllAvailable(): List<Availability>
 
+    @Query("SELECT * FROM availabilities WHERE dateTime = :dateTime LIMIT 1")
+    suspend fun getAvailabilityByDateTime(dateTime: String): Availability?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAvailability(availability: Availability)
 
