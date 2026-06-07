@@ -21,10 +21,14 @@ import com.example.rachelbello2.controller.DentistController
 import com.example.rachelbello2.controller.LoginController
 import com.example.rachelbello2.model.AppDatabase
 import com.example.rachelbello2.ui.theme.RachelBelloTheme
+import com.example.rachelbello2.view.AdminScreen
 import com.example.rachelbello2.view.DentistScreen
 import com.example.rachelbello2.view.LoginScreen
 import com.example.rachelbello2.view.PatientScreen
 import com.example.rachelbello2.view.RegistrationScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,9 +41,14 @@ class MainActivity : AppCompatActivity() {
         val dentistController = DentistController(db.availabilityDao())
         val appointmentController = AppointmentController(db.appointmentDao(), db.availabilityDao())
 
+        // Create Admin user on startup if it doesn't exist
+        CoroutineScope(Dispatchers.IO).launch {
+            loginController.createInitialAdmin()
+        }
+
         setContent {
             RachelBelloTheme {
-                AppNavigation(loginController, dentistController, appointmentController)
+                AppNavigation(db.userDao(), loginController, dentistController, appointmentController)
             }
         }
     }
@@ -47,6 +56,7 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun AppNavigation(
+    userDao: com.example.rachelbello2.model.UserDao,
     loginController: LoginController,
     dentistController: DentistController,
     appointmentController: AppointmentController
@@ -58,15 +68,22 @@ fun AppNavigation(
             LoginScreen(
                 loginController = loginController,
                 onLoginSuccess = { user ->
-                    if (user.role == "Dentista") {
-                        navController.navigate("dentist")
-                    } else {
-                        navController.navigate("patient/${user.name}")
+                    when (user.role) {
+                        "Admin" -> navController.navigate("admin")
+                        "Dentista" -> navController.navigate("dentist")
+                        else -> navController.navigate("patient/${user.name}")
                     }
                 },
                 onNavigateToRegistration = {
                     navController.navigate("registration")
                 }
+            )
+        }
+        composable("admin") {
+            AdminScreen(
+                userDao = userDao,
+                loginController = loginController,
+                onBack = { navController.popBackStack() }
             )
         }
         composable("registration") {
